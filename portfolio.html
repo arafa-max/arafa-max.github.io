@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arafat — Web Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060810;
+    --surface: #0c1020;
+    --border: #161e30;
+    --accent: #00f5a0;
+    --accent2: #00b4d8;
+    --text: #dde4f0;
+    --muted: #4a5a78;
+    --card: #0d1422;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+
+  .cursor { position: fixed; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .2s, height .2s; mix-blend-mode: screen; }
+  .cursor-ring { position: fixed; width: 38px; height: 38px; border: 1.5px solid rgba(0,245,160,0.35); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width .25s, height .25s, border-color .25s; }
+
+  #starfield { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+
+  .blob { position: fixed; border-radius: 50%; filter: blur(130px); pointer-events: none; z-index: 0; animation: blobDrift 18s ease-in-out infinite alternate; }
+  .blob1 { width: 600px; height: 600px; background: rgba(0,245,160,0.055); top: -150px; left: -150px; }
+  .blob2 { width: 500px; height: 500px; background: rgba(0,180,216,0.055); bottom: 0; right: -150px; animation-delay: -9s; }
+  @keyframes blobDrift { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,30px) scale(1.08); } }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 18px 48px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(24px); background: rgba(6,8,16,0.75); border-bottom: 1px solid var(--border); animation: navSlide .7s ease both; }
+  @keyframes navSlide { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: translateY(0); } }
+
+  .logo { font-family: 'Space Mono', monospace; font-size: 1rem; color: var(--accent); letter-spacing: 3px; }
+  .logo::after { content: '_'; animation: blink 1.1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .nav-links { display: flex; gap: 36px; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.8rem; letter-spacing: 1.5px; text-transform: uppercase; transition: color .3s; position: relative; }
+  .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--accent); transition: width .3s; }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a:hover::after { width: 100%; }
+
+  .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; align-items: center; padding: 120px 48px 80px; max-width: 1280px; margin: 0 auto; overflow: hidden; }
+  .hero-bg-text { position: absolute; top: 50%; right: -40px; transform: translateY(-50%); font-family: 'Bebas Neue', cursive; font-size: clamp(140px,20vw,260px); color: rgba(255,255,255,0.018); pointer-events: none; user-select: none; white-space: nowrap; animation: bgDrift 20s ease-in-out infinite alternate; }
+  @keyframes bgDrift { from { transform: translateY(-50%); } to { transform: translateY(-52%) translateX(-20px); } }
+
+  .hero-content { max-width: 720px; }
+
+  .hero-tag { display: inline-flex; align-items: center; gap: 10px; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 28px; padding: 7px 16px; border: 1px solid rgba(0,245,160,0.25); border-radius: 3px; background: rgba(0,245,160,0.04); animation: fadeUp .9s ease both; }
+  .hero-tag .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.8)} }
+
+  h1 { font-family: 'Bebas Neue', cursive; font-size: clamp(3.5rem,9vw,7.5rem); font-weight: 400; line-height: 0.95; letter-spacing: 1px; margin-bottom: 28px; animation: fadeUp .9s .1s ease both; }
+  h1 .grad { background: linear-gradient(120deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 200% 200%; animation: gradShift 6s ease-in-out infinite; }
+  @keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+
+  .hero-desc { font-size: 1.05rem; color: var(--muted); line-height: 1.75; max-width: 500px; margin-bottom: 44px; animation: fadeUp .9s .2s ease both; font-weight: 300; }
+
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeUp .9s .3s ease both; }
+
+  .btn { padding: 13px 30px; border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .3s; letter-spacing: .5px; position: relative; overflow: hidden; }
+  .btn-primary { background: var(--accent); color: #060810; border: none; }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(0,245,160,0.35); }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-3px); }
+
+  .hero-stack { margin-top: 64px; animation: fadeUp .9s .45s ease both; }
+  .stack-label { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+  .stack-tags { display: flex; gap: 10px; flex-wrap: wrap; }
+  .tag { padding: 5px 14px; border-radius: 3px; font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--accent2); background: rgba(0,180,216,0.07); border: 1px solid rgba(0,180,216,0.18); transition: all .3s; cursor: default; }
+  .tag:hover { background: rgba(0,180,216,0.14); transform: translateY(-2px); }
+
+  .scroll-hint { position: absolute; bottom: 40px; left: 48px; display: flex; align-items: center; gap: 12px; font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; animation: fadeUp .9s .6s ease both; }
+  .scroll-line { width: 40px; height: 1px; background: var(--muted); position: relative; overflow: hidden; }
+  .scroll-line::after { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: var(--accent); animation: scanLine 2s ease-in-out infinite; }
+  @keyframes scanLine { 0%{left:-100%} 100%{left:100%} }
+
+  section { position: relative; z-index: 1; padding: 110px 48px; max-width: 1280px; margin: 0 auto; }
+  .section-header { display: flex; align-items: center; gap: 20px; margin-bottom: 60px; }
+  .section-num { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 2px; }
+  .section-title { font-family: 'Bebas Neue', cursive; font-size: clamp(2rem,4vw,3rem); letter-spacing: 2px; }
+  .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border) 0%, transparent 100%); }
+
+  .tabs { display: flex; margin-bottom: 36px; border-bottom: 1px solid var(--border); }
+  .tab-btn { padding: 12px 28px; font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); background: none; border: none; cursor: pointer; position: relative; transition: color .3s; }
+  .tab-btn::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform .3s; }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn.active::after { transform: scaleX(1); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+
+  .project-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 34px; transition: transform .35s, box-shadow .35s, border-color .35s; position: relative; overflow: hidden; animation: cardReveal .6s ease both; }
+  .project-card:nth-child(2) { animation-delay: .1s; }
+  .project-card:nth-child(3) { animation-delay: .2s; }
+  @keyframes cardReveal { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .project-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transform: scaleX(0); transform-origin: left; transition: transform .4s; }
+  .project-card:hover { border-color: rgba(0,245,160,0.18); transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+  .project-card:hover::before { transform: scaleX(1); }
+
+  .project-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(0,245,160,0.08); border: 1px solid rgba(0,245,160,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 22px; transition: transform .3s, box-shadow .3s; }
+  .project-card:hover .project-icon { transform: rotate(-5deg) scale(1.1); box-shadow: 0 8px 24px rgba(0,245,160,0.2); }
+
+  .project-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+  .project-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.65; margin-bottom: 22px; font-weight: 300; }
+  .project-tech { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; }
+  .tech-badge { padding: 4px 10px; border-radius: 3px; font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); transition: all .3s; }
+  .project-card:hover .tech-badge { border-color: rgba(0,245,160,0.15); color: rgba(0,245,160,0.7); }
+  .project-link { display: inline-flex; align-items: center; gap: 8px; font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 1px; color: var(--accent); text-decoration: none; font-weight: 600; transition: gap .3s; }
+  .project-link:hover { gap: 14px; }
+
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+  .skill-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; display: flex; align-items: center; gap: 14px; transition: all .3s; position: relative; overflow: hidden; }
+  .skill-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); transform: scaleY(0); transition: transform .3s; }
+  .skill-item:hover { border-color: rgba(0,245,160,0.2); background: rgba(0,245,160,0.03); transform: translateX(4px); }
+  .skill-item:hover::before { transform: scaleY(1); }
+  .skill-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; box-shadow: 0 0 8px rgba(0,245,160,0.5); }
+  .skill-name { font-family: 'Space Mono', monospace; font-size: 0.8rem; }
+
+  .contact-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 70px 60px; text-align: center; position: relative; overflow: hidden; }
+  .contact-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% -20%, rgba(0,245,160,0.07) 0%, transparent 60%); pointer-events: none; }
+  .contact-box h3 { font-family: 'Bebas Neue', cursive; font-size: clamp(2rem,5vw,3.5rem); letter-spacing: 3px; margin-bottom: 16px; position: relative; }
+  .contact-box p { color: var(--muted); margin-bottom: 40px; font-size: 1rem; position: relative; font-weight: 300; }
+  .contact-links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+
+  footer { position: relative; z-index: 1; text-align: center; padding: 40px; border-top: 1px solid var(--border); color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .hero-bg-text { display: none; }
+    section { padding: 70px 20px; }
+    .contact-box { padding: 44px 24px; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .scroll-hint { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<canvas id="starfield"></canvas>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+
+<nav>
+  <div class="logo">arafa-max</div>
+  <ul class="nav-links">
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg-text">DEV</div>
+  <div class="hero-content">
+    <div class="hero-tag"><span class="dot"></span>Available for work</div>
+    <h1>Hi, I'm<br><span class="grad">Arafat</span><br>Web Dev</h1>
+    <p class="hero-desc">I build fast, clean, and responsive websites — from landing pages to full-stack web applications. Frontend & backend, all in one.</p>
+    
+    <div class="hero-stack">
+      <div class="stack-label">Tech Stack</div>
+      <div class="stack-tags">
+        <span class="tag">HTML/CSS</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">React</span>
+        <span class="tag">Node.js</span>
+        <span class="tag">Bun.js</span>
+        <span class="tag">Python</span>
+        <span class="tag">Tailwind</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll
+  </div>
+</div>
+
+<section id="projects">
+  <div class="section-header reveal">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Projects</h2>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="tabs reveal">
+    <button class="tab-btn active" onclick="switchTab('frontend', this)">Frontend</button>
+    <button class="tab-btn" onclick="switchTab('backend', this)">Backend</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-frontend">
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="project-icon">📖</div>
+        <div class="project-name">Quran App</div>
+        <p class="project-desc">Beautiful Quran reading web app with clean UI, smooth navigation between surahs, and responsive design for all devices.</p>
+        <div class="project-tech">
+          <span class="tech-badge">HTML</span>
+          <span class="tech-badge">CSS</span>
+          <span class="tech-badge">JavaScript</span>
+        </div>
+        <a href="https://quran-w.netlify.app" target="_blank" class="project-link">View Live →</a>
+      </div>
+      <div class="project-card">
+        <div class="project-icon">📷</div>
+        <div class="project-name">Senticam</div>
+        <p class="project-desc">Elegant camera product landing page with modern layout, smooth animations, and pixel-perfect responsive design.</p>
+        <div class="project-tech">
+          <span class="tech-badge">HTML</span>
+          <span class="tech-badge">CSS</span>
+          <span class="tech-badge">JavaScript</span>
+        </div>
+        <a href="https://senticam.netlify.app/" target="_blank" class="project-link">View Live →</a>
+      </div>
+      <div class="project-card">
+        <div class="project-icon">🔐</div>
+        <div class="project-name">Authorization UI</div>
+        <p class="project-desc">Full auth flow — login, sign up, email verification, forgot password. Clean UI with JWT integration and modern design.</p>
+        <div class="project-tech">
+          <span class="tech-badge">HTML</span>
+          <span class="tech-badge">CSS</span>
+          <span class="tech-badge">JavaScript</span>
+          <span class="tech-badge">JWT</span>
+        </div>
+        <a href="https://arafa-max.github.io/Authorization/" target="_blank" class="project-link">View Live →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-backend">
+    <div class="projects-grid">
+      <div class="project-card">
+        <div class="project-icon">✅</div>
+        <div class="project-name">Todo List</div>
+        <p class="project-desc">Task management REST API with admin panel and JWT authentication. Full CRUD operations, role-based access.</p>
+        <div class="project-tech">
+          <span class="tech-badge">Python</span>
+          <span class="tech-badge">FastAPI</span>
+          <span class="tech-badge">JWT</span>
+          <span class="tech-badge">REST API</span>
+        </div>
+        <a href="https://github.com/arafa-max/todo-list" target="_blank" class="project-link">View Code →</a>
+      </div>
+      <div class="project-card">
+        <div class="project-icon">💬</div>
+        <div class="project-name">Messenger</div>
+        <p class="project-desc">Lightweight real-time messaging backend built with Bun.js and WebSockets. Fast and minimal architecture.</p>
+        <div class="project-tech">
+          <span class="tech-badge">Bun.js</span>
+          <span class="tech-badge">WebSocket</span>
+          <span class="tech-badge">REST API</span>
+        </div>
+        <a href="https://github.com/arafa-max/messenger-" target="_blank" class="project-link">View Code →</a>
+      </div>
+      <div class="project-card">
+        <div class="project-icon">🚀</div>
+        <div class="project-name">Messenger Full</div>
+        <p class="project-desc">Full-featured messaging backend with rooms, auth, and real-time WebSocket support. Complete production-ready solution.</p>
+        <div class="project-tech">
+          <span class="tech-badge">Bun.js</span>
+          <span class="tech-badge">WebSocket</span>
+          <span class="tech-badge">JWT</span>
+          <span class="tech-badge">REST API</span>
+        </div>
+        <a href="https://github.com/arafa-max/messenger-full" target="_blank" class="project-link">View Code →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills">
+  <div class="section-header reveal">
+    <span class="section-num">02</span>
+    <h2 class="section-title">Skills</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-item reveal"><div class="skill-dot"></div><span class="skill-name">HTML5 / CSS3</span></div>
+    <div class="skill-item reveal" style="transition-delay:.05s"><div class="skill-dot"></div><span class="skill-name">JavaScript</span></div>
+    <div class="skill-item reveal" style="transition-delay:.1s"><div class="skill-dot"></div><span class="skill-name">React</span></div>
+    <div class="skill-item reveal" style="transition-delay:.15s"><div class="skill-dot"></div><span class="skill-name">Node.js</span></div>
+    <div class="skill-item reveal" style="transition-delay:.2s"><div class="skill-dot"></div><span class="skill-name">Bun.js</span></div>
+    <div class="skill-item reveal" style="transition-delay:.25s"><div class="skill-dot"></div><span class="skill-name">Python</span></div>
+    <div class="skill-item reveal" style="transition-delay:.3s"><div class="skill-dot"></div><span class="skill-name">FastAPI</span></div>
+    <div class="skill-item reveal" style="transition-delay:.35s"><div class="skill-dot"></div><span class="skill-name">REST API</span></div>
+    <div class="skill-item reveal" style="transition-delay:.4s"><div class="skill-dot"></div><span class="skill-name">JWT Auth</span></div>
+    <div class="skill-item reveal" style="transition-delay:.45s"><div class="skill-dot"></div><span class="skill-name">WebSockets</span></div>
+    <div class="skill-item reveal" style="transition-delay:.5s"><div class="skill-dot"></div><span class="skill-name">Tailwind CSS</span></div>
+    <div class="skill-item reveal" style="transition-delay:.55s"><div class="skill-dot"></div><span class="skill-name">Git / GitHub</span></div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="section-header reveal">
+    <span class="section-num">03</span>
+    <h2 class="section-title">Contact</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="contact-box reveal">
+    <h3>Let's work together</h3>
+    <p>Looking for a web developer? I'm available for freelance projects on Fiverr and Kwork.</p>
+    <div class="contact-links">
+      <a href="https://github.com/arafa-max" target="_blank" class="btn btn-outline">GitHub</a>
+      <a href="https://www.fiverr.com/arafatit1" target="_blank" class="btn btn-outline">Fiverr</a>
+    </div>
+  </div>
+</section>
+
+<footer><p>© 2026 Arafat — Built with HTML, CSS & JS</p></footer>
+
+<script>
+  /* CURSOR */
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => {
+    mx=e.clientX; my=e.clientY;
+    cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+  });
+  (function animRing(){
+    rx+=(mx-rx)*0.12; ry+=(my-rhttps://github.com/arafa-max/arafa-max.github.io.gity)*0.12;
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+  document.querySelectorAll('a,button').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ cursor.style.width='6px'; cursor.style.height='6px'; ring.style.width='56px'; ring.style.height='56px'; ring.style.borderColor='rgba(0,245,160,0.6)'; });
+    el.addEventListener('mouseleave',()=>{ cursor.style.width='10px'; cursor.style.height='10px'; ring.style.width='38px'; ring.style.height='38px'; ring.style.borderColor='rgba(0,245,160,0.35)'; });
+  });
+
+  /* STARFIELD */
+  const canvas=document.getElementById('starfield');
+  const ctx=canvas.getContext('2d');
+  function resize(){ canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize',resize);
+  const stars=Array.from({length:150},()=>({x:Math.random(),y:Math.random(),r:Math.random()*1.2+0.2,a:Math.random(),speed:Math.random()*0.0004+0.0001,dir:Math.random()>.5?1:-1}));
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    stars.forEach(s=>{ s.a+=s.speed*s.dir; if(s.a>1||s.a<0.1)s.dir*=-1; ctx.beginPath(); ctx.arc(s.x*canvas.width,s.y*canvas.height,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(200,220,255,${s.a*0.6})`; ctx.fill(); });
+    requestAnimationFrame(draw);
+  })();
+
+  /* SCROLL REVEAL */
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting)e.target.classList.add('visible'); },{threshold:0.12}));
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+  /* TABS */
+  function switchTab(name,btn){
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    btn.classList.add('active');
+    document.querySelectorAll('#tab-'+name+' .project-card').forEach((c,i)=>{ c.style.animation='none'; c.offsetHeight; c.style.animation=`cardReveal .6s ${i*.1}s ease both`; });
+  }
+</script>
+</body>
+</html>
